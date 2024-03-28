@@ -32,7 +32,7 @@ dminfo = {'TYPE': 'TiledShapeStMan','SPEC': {'DEFAULTTILESHAPE': [4, 65520]}}
 
 for col in ["WEIGHT","SIGMA"]:
    cd = t.getcoldesc(col)
-   #cd["shape"][0]=4
+   #cd["shape"][0]=4 # May need to uncomment if this column exists
    cd["NAME"]=col
    dminfo["NAME"]=col
    t.renamecol(col,col+"1")
