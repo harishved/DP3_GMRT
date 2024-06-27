@@ -16,6 +16,37 @@ import numpy as np
 msin=sys.argv[1]
 
 t=tab.table(msin,readonly=False)
+
+unique_scans = list(set(t.getcol("SCAN_NUMBER")))
+if len(unique_scans)>1:
+    print ("MS has more than one scan. First run split_scans.py and then get back here")
+    t.close()
+    exit(1)
+unique_fieldid = list(set(t.getcol("FIELD_ID")))
+if len(unique_fieldid)>1:
+    print *"MS has main table rows on more than one field. This wont work; existing."
+    t.close()
+    exit(1)
+
+# Remove unwanted fields
+tf = tab.table(msin+"/FIELD",readonly=False)
+existing_ids = [i for i in range(tf.nrows())]
+
+existing_ids.remove(unique_fieldid[0])
+unique_srcid = tf.getcol("SOURCE_ID")[unique_fieldid[0]]
+unique_srcname = tf.getcol("NAME")[unique_fieldid[0]]
+tf.removerows(existing_ids)
+tf.close()
+
+# Remove unwanted sources
+tf = tab.table(msin+"/SOURCE",readonly=False)
+existing_ids = tf.getcol("SOURCE_ID")
+discard_rows = [x for x  in range(tf.nrows()) if existing_ids[x]!=unique_srcid]
+tf.removerows(discard_rows)
+tf.close()
+
+
+print ("Source name: %s, Source id: %d, Field id: %d. Will remove metadata of all other sources/fields"%(unique_srcname,unique_srcid,unique_fieldid[0]))
 nchan=t[0]["FLAG"].shape[0]
 dminfo = {'TYPE': 'TiledShapeStMan','SPEC': {'DEFAULTTILESHAPE': [4, nchan, 128]}}
 
